@@ -5,6 +5,7 @@
 .env.prod
 
 /server/node_modules/
+/server/package-lock.json
 /server/logs/
 /docker/nginx/ssl/certs/
 /server/dist/
