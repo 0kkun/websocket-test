@@ -20,6 +20,7 @@
 | nginx | 1.19.3 |
 | node | 14.17.6 |
 | npm | 7.22.0 |
+| typescript | 4.5.5 |
 
 - LocalのUbuntu情報
 ```
