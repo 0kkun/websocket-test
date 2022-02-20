@@ -26,6 +26,7 @@ websocket:
 npm-start:
 	docker-compose exec websocket bash -c "npm start"
 
+# ローカルでは基本下記を使用する
 .PHONY: npm-start-ts
 npm-start-ts:
 	docker-compose exec websocket bash -c "npm run start-ts-dev"
