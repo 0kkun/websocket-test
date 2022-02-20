@@ -1,0 +1,35 @@
+version: "3"
+services:
+  # websocket:
+  #   image: mti-msg_websocket
+  #   container_name: mti-msg-websocket
+  #   build:
+  #     dockerfile: Dockerfile
+  #     context: docker/websocket
+  #   volumes:
+  #     - "./server:/home/app"
+  #     - "/home/app/node_modules"
+  #   tty: true
+  #   ports:
+  #     - "3000:3000"
+  #   working_dir: /home/app
+  #   # server/.envを作成し以下を設定してもOK
+  #   environment:
+  #     - NODE_ENV=local
+  #     - NODE_PORT=3000
+  #     - TZ=Asia/Tokyo
+
+  nginx:
+    image: test_websocket_nginx
+    container_name: test-websocket-nginx
+    build:
+      dockerfile: Dockerfile
+      context: docker/nginx
+    ports:
+      - 443:443
+    links:
+      - 'websocket'
+    depends_on:
+      - websocket
+    # volumes:
+    #   - "./docker/nginx/certs:/etc/nginx/cert"

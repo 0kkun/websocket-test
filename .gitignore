@@ -1,0 +1,10 @@
+.DS_Store
+
+.env
+.env.dev
+.env.prod
+
+/server/node_modules/
+/server/logs/
+/docker/nginx/ssl/certs/
+/server/dist/
