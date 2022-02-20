@@ -1,0 +1,60 @@
+{
+    "appenders": {
+    "access": {
+        "type": "dateFile",
+        "filename": "./logs/access.log",
+        "pattern": "-yyyy-MM-dd",
+        "backups": 7,
+        "compress":true
+    },
+    "error": {
+        "type": "dateFile",
+        "filename": "./logs/error.log",
+        "pattern": "-yyyy-MM-dd",
+        "backups": 7,
+        "compress":true
+    },
+    "system": {
+        "type": "dateFile",
+        "filename": "./logs/system.log",
+        "pattern": "-yyyy-MM-dd",
+        "backups": 7,
+        "compress":true
+    },
+    "console": {
+        "type": "console"
+    },
+    "stdout": {
+        "type": "stdout"
+    }
+    },
+
+    "categories": {
+    "default": {
+        "appenders": [
+        "access"
+        ]
+        ,"level": "INFO"
+    },
+    "access": {
+        "appenders": [
+        "access"
+        ]
+        ,"level": "DEBUG"
+    },
+    "system": {
+        "appenders": [
+        "system"
+        ]
+    ,"level": "ERROR"
+    },
+    "error": {
+        "appenders": [
+        "error"
+        ]
+    ,"level": "WARN"
+    }
+    },
+
+    "replaceConsole": true
+}
