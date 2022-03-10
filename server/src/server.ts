@@ -1,4 +1,3 @@
-import express from 'express';
 import ws from 'ws';
 import WebSocket from 'ws';
 import { WsRequest, Connections } from './entity/Type';
@@ -6,6 +5,13 @@ import { WsRequest, Connections } from './entity/Type';
 // 環境変数読み込み
 const env = process.env
 const WEBSOCKET_PORT: number = Number(env.NODE_PORT) || 3000;
+// 疎通を確認する間隔
+const PING_INTERVAL_SEC: number = 10;
+// リクエスト者を宛先に含めるか
+const IS_INCLUDE_MYSELF: boolean = true;
+// 接続コントロール用
+let connectedCount: number = 0;
+let connections: Connections[] = [];
 
 // ログ設定
 const log4js = require('log4js')
@@ -16,15 +22,6 @@ const logger = log4js.getLogger('access')
 const server = new ws.Server({port: WEBSOCKET_PORT})
 logger.info(`Socketサーバー起動... [ENV:${env.NODE_ENV}]`)
 
-// 接続コントロール用
-let connectedCount: number = 0;
-let connections: Connections[] = [];
-
-// 疎通を確認する間隔
-const PING_INTERVAL_SEC: number = 10;
-// リクエスト者を宛先に含めるか
-const IS_INCLUDE_MYSELF: boolean = true;
-
 /**
  * Websocket connection
  */
@@ -33,14 +30,7 @@ server.on('connection', ws => {
         logger.info(`Running PORT : ${WEBSOCKET_PORT}`)
 
         /** 疎通確認を一定間隔で行う (接続維持) */
-        let interval = setInterval(() => {
-            if (ws.bufferedAmount == 0) {
-                ws.ping();
-            } else {
-                ws.close();
-                logger.info("Pingが送信できなくなった為、接続を閉じます。")
-            }
-        }, 1000 * PING_INTERVAL_SEC);
+        let interval = startPing(ws);
 
         /*** message event ***/
         ws.on('message', (message: string) => {
@@ -60,11 +50,9 @@ server.on('connection', ws => {
             stopPingTimer(connections, ws)
             // コネクション情報から接続が切れた通信を削除
             checkTheConnection();
-
             connectedCount = connections.length;
             logger.info(`クライアントからの接続が閉じられました。現在の接続数:${connectedCount}, ReasonStatusCode:${event}`);
         });
-
 
         /*** disconnect event ***/
         ws.on('disconnect', () => {
@@ -72,7 +60,7 @@ server.on('connection', ws => {
             stopPingTimer(connections, ws)
             // コネクション情報から接続が切れた通信を削除
             checkTheConnection();
-    
+
             connectedCount = connections.length;
             logger.info(`クライアントからの接続が切れました。現在の接続数:${connectedCount}`);
         })
@@ -83,7 +71,7 @@ server.on('connection', ws => {
         })
 
     } catch (exception) {
-        logger.info(exception);
+        logger.error(exception);
     }
 });
 
@@ -105,7 +93,6 @@ function saveConnectionInfo(userId: number, currentWs: WebSocket, interval: Node
     }
 }
 
-
 /**
  * 接続者全員にデータを送る
  * @param connects 
@@ -115,7 +102,6 @@ function saveConnectionInfo(userId: number, currentWs: WebSocket, interval: Node
  * @returns void
  */
 function sendMessageAll(reqData: any, userId: number): void {
-
     // 接続していないconnectionは除外する
     checkTheConnection();
 
@@ -152,4 +138,20 @@ function stopPingTimer(connects: Connections[], ws: WebSocket): void {
         logger.info('Pingタイマーを停止させました。');
         clearInterval(timer);
     }
+}
+
+/**
+ * ping送信開始する
+ * @param currentWs 
+ * @returns 
+ */
+function startPing(currentWs: WebSocket): NodeJS.Timeout {
+    return setInterval(() => {
+        if (currentWs.bufferedAmount == 0) {
+            currentWs.ping();
+        } else {
+            currentWs.close();
+            logger.info("Pingが送信できなくなった為、接続を閉じます。")
+        }
+    }, 1000 * PING_INTERVAL_SEC);
 }
